@@ -1,0 +1,29 @@
+name: Rust 跨平台编译
+on: [push] # 提交代码时触发
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - run: cargo build --target x86_64-pc-windows-msvc --features wasm --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-face-auth
+          path: target/x86_64-pc-windows-msvc/release/face_auth.dll
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - run: cargo install cargo-ndk
+      - run: cargo ndk -t aarch64-linux-android build --features android --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-face-auth
+          path: target/aarch64-linux-android/release/libface_auth.so
